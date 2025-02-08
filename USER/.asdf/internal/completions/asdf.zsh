@@ -1,5 +1,4 @@
 #compdef asdf
-compdef _asdf asdf
 #description tool to manage versions of multiple runtimes
 
 local curcontext="$curcontext" state state_descr line subcmd
@@ -9,11 +8,11 @@ local -a asdf_commands
 asdf_commands=( # 'asdf help' lists commands with help text
   # plugins
   'plugin:plugin management sub-commands'
-  'plugin-add:add plugin from asdf-plugins repo or from git URL'
-  'plugin-list:list installed plugins (--urls with URLs)'
-  'plugin-list-all:list all plugins registered in asdf-plugins repo'
-  'plugin-remove:remove named plugin and all packages for it'
-  'plugin-update:update named plugin (or --all)'
+  'plugin add:add plugin from asdf-plugins repo or from git URL'
+  'plugin list:list installed plugins (--urls with URLs)'
+  'plugin list all:list all plugins registered in asdf-plugins repo'
+  'plugin remove:remove named plugin and all packages for it'
+  'plugin update:update named plugin (or --all)'
 
   # packages
   'install:install plugin at stated version, or all from .tools-versions'
@@ -26,7 +25,7 @@ asdf_commands=( # 'asdf help' lists commands with help text
   'local:set package local version'
   'global:set package global version'
   'list:list installed versions of a package'
-  'list-all:list all available (remote) versions of a package'
+  'list all:list all available (remote) versions of a package'
 
   # utils
   'exec:executes the command shim for the current version'
@@ -34,7 +33,7 @@ asdf_commands=( # 'asdf help' lists commands with help text
   'info:print os, shell and asdf debug information'
   'reshim:recreate shims for version of a package'
   'shim:shim management sub-commands'
-  'shim-versions:list for given command which plugins and versions provide it'
+  'shimversions:list for given command which plugins and versions provide it'
   'update:update ASDF to the latest stable release (unless --head)'
 )
 
@@ -91,7 +90,6 @@ _asdf__installed_versions_of_plus_system() {
     compadd -a versions
 }
 
-_asdf() {
 
 local -i IntermediateCount=0
 
@@ -119,35 +117,33 @@ _asdf__dash_commands() {
     subcmd="${subcmd}-${words[2+IntermediateCount]}"
   fi
 }
-
-
 case "$subcmd" in
 (plugin|shim|list)
   _asdf__dash_commands
   ;;
 esac
 case "$subcmd" in
-(plugin-list)
+(plugin\ list)
   _asdf__dash_commands
   ;;
 esac
 
 case "$subcmd" in
-(plugin-add)
+(plugin\ add)
   if (( CURRENT == 3 + IntermediateCount )); then
     _asdf__available_plugins
   else
     # Optional URL
-    curcontext="${curcontext/=plugin-add:/=plugin-add-${words[3]}:}"
+    curcontext="${curcontext/=plugin add:/=plugin-add-${words[3]}:}"
     if (( CURRENT == 4 + IntermediateCount )); then
       _arguments "*:${words[3]} package url:_urls"
     fi
   fi
   ;;
-(plugin-remove|current|list|list-all)
+(plugin\ remove|current|list|list\ all)
   (( CURRENT == 3 + IntermediateCount )) && _asdf__installed_plugins
   ;;
-(plugin-update)
+(plugin\ update)
   (( CURRENT == 3 + IntermediateCount )) && _alternative \
     'all:all:(--all)' \
     'asdf-available-plugins:Installed ASDF Plugins:_asdf__installed_plugins'
@@ -161,14 +157,14 @@ case "$subcmd" in
     if [[ $ver_prefix == latest:* ]]; then
       _wanted "latest-versions-$pkg" \
         expl "Latest version" \
-        compadd -- latest:${^$(asdf list-all "$pkg")}
+        compadd -- latest:${^$(asdf list\ all "$pkg")}
     else
       _wanted "latest-tag-$pkg" \
         expl "Latest version" \
         compadd -- 'latest' 'latest:'
       _wanted "remote-versions-$pkg" \
         expl "Available versions of $pkg" \
-        compadd -- $(asdf list-all "$pkg")
+        compadd -- $(asdf list\ all "$pkg")
     fi
   fi
   ;;
@@ -183,7 +179,7 @@ case "$subcmd" in
     [[ -n $query ]] || query='[0-9]'
     _wanted "latest-pattern-$pkg" \
       expl "Pattern to look for in matching versions of $pkg" \
-      compadd -- $(asdf list-all "$pkg" "$query")
+      compadd -- $(asdf list\ all "$pkg" "$query")
   fi
   ;;
 (uninstall|reshim)
@@ -199,7 +195,7 @@ case "$subcmd" in
   compset -n 2
   _arguments '1:plugin-name: _asdf__installed_plugins' '2::package-version:{_asdf__installed_versions_of ${words[2]}}'
   ;;
-(which|shim-versions)
+(which|shimversions)
   _wanted asdf-shims expl "ASDF Shims" compadd -- "${asdf_dir:?}/shims"/*(:t)
   ;;
 (exec)
@@ -224,4 +220,3 @@ case "$subcmd" in
   (( CURRENT == 3 )) && compadd -- --head
   ;;
 esac
-}

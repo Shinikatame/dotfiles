@@ -34,7 +34,7 @@ The full list of scripts callable from asdf.
 | Script                                                                                                | Description                                                      |
 | :---------------------------------------------------------------------------------------------------- |:-----------------------------------------------------------------|
 | [bin/list-all](#bin-list-all) <Badge type="tip" text="required" vertical="middle" />                  | List all installable versions                                    |
-| [bin/download](#bin-download) <Badge type="tip" text="required" vertical="middle" />                  | Download source code or binary for the specified version         |
+| [bin/download](#bin-download) <Badge type="warning" text="recommended" vertical="middle" />           | Download source code or binary for the specified version         |
 | [bin/install](#bin-install) <Badge type="tip" text="required" vertical="middle" />                    | Installs the specified version                                   |
 | [bin/latest-stable](#bin-latest-stable) <Badge type="warning" text="recommended" vertical="middle" /> | List the latest stable version of the specified tool             |
 | [bin/help.overview](#bin-help.overview)                                                               | Output a general description about the plugin & tool             |
@@ -267,8 +267,7 @@ Determine the latest stable version of a tool. If absent, the asdf core will `ta
 
 **Commands that invoke this script**
 
-- `asdf global <tool> latest`: set the global version of a tool to the latest stable version for that tool.
-- `asdf local <name> latest`: set the local version of a tool to the latest stable version for that tool.
+- `asdf set <tool> latest`: set the global version of a tool to the latest stable version for that tool.
 - `asdf install <tool> latest`: installs the latest version of a tool.
 - `asdf latest <tool> [<version>]`: outputs the latest version of a tool based on the optional filter.
 - `asdf latest --all`: outputs the latest version of all tools managed by asdf and whether they are installed.

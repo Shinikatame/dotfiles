@@ -13,6 +13,7 @@ import (
 	"strings"
 	"text/tabwriter"
 
+	"github.com/asdf-vm/asdf/internal/cli/set"
 	"github.com/asdf-vm/asdf/internal/completions"
 	"github.com/asdf-vm/asdf/internal/config"
 	"github.com/asdf-vm/asdf/internal/exec"
@@ -261,6 +262,29 @@ func Execute(version string) {
 				Action: func(cCtx *cli.Context) error {
 					args := cCtx.Args()
 					return reshimCommand(logger, args.Get(0), args.Get(1))
+				},
+			},
+			{
+				Name: "set",
+				Flags: []cli.Flag{
+					&cli.BoolFlag{
+						Name:    "home",
+						Aliases: []string{"u"},
+						Usage:   "The version should be set in the current users home directory",
+					},
+					&cli.BoolFlag{
+						Name:    "parent",
+						Aliases: []string{"p"},
+						Usage:   "The version should be set in the closest existing .tool-versions file in a parent directory",
+					},
+				},
+				Action: func(cCtx *cli.Context) error {
+					args := cCtx.Args().Slice()
+					home := cCtx.Bool("home")
+					parent := cCtx.Bool("parent")
+					return set.Main(os.Stdout, os.Stderr, args, home, parent, func() (string, error) {
+						return os.UserHomeDir()
+					})
 				},
 			},
 			{
@@ -750,6 +774,11 @@ func pluginListCommand(cCtx *cli.Context, logger *log.Logger) error {
 		return err
 	}
 
+	if len(plugins) == 0 {
+		logger.Println("No plugins installed")
+		return nil
+	}
+
 	// TODO: Add some sort of presenter logic in another file so we
 	// don't clutter up this cmd code with conditional presentation
 	// logic
@@ -873,7 +902,7 @@ func helpCommand(logger *log.Logger, asdfVersion, tool, version string) error {
 func pluginUpdateCommand(cCtx *cli.Context, logger *log.Logger, pluginName, ref string) error {
 	updateAll := cCtx.Bool("all")
 	if !updateAll && pluginName == "" {
-		return cli.Exit("usage: asdf plugin-update {<name> [git-ref] | --all}", 1)
+		return cli.Exit("usage: asdf plugin update {<name> [git-ref] | --all}", 1)
 	}
 
 	conf, err := config.LoadConfig()
@@ -1439,7 +1468,7 @@ func whereCommand(logger *log.Logger, tool, versionStr string) error {
 		}
 
 		// not found
-		msg := fmt.Sprintf("No version is set for %s; please run `asdf <global | shell | local> %s <version>`", tool, tool)
+		msg := fmt.Sprintf("No version is set for %s; please run `asdf set [options] %s <version>`", tool, tool)
 		logger.Print(msg)
 		return errors.New(msg)
 	}
